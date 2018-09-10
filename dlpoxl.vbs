@@ -32,40 +32,42 @@ End Function
 'ABOVE IS THE ALL-MIGHTY FUNCTION!!!
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function getData (workbook, ByRef poLinesArr)
+	getData = 1
 	Dim size: size = UBound(poLinesArr, 2)
     Dim length: length = workbook.Sheets(1).UsedRange.Rows.Count-1
     ReDim Preserve poLinesArr(15, length + size)
-
+	Dim j, k, r
     If poLinesArr(0,0) = "" Then
-        Dim j, k
+        
         For j = 0 To length
-			Dim r = 0
+			r = 0
 			For k = 65 To 79
 				
 				If workbook.Sheets(1).Range(Chr(k) & j) Is Not "" Then
-					poLinesArr(r,j) = workbook.Sheets(1).Range("A" & j) '1
+					poLinesArr(r,j) = workbook.Sheets(1).Range(Chr(k) & j)
 				else
 					poLinesArr(r,j) = "null"
 				End If
 				r = r + 1
+				k = k + 1
 			Next
 		Next
 	else
-		Dim j, k
         For j = size To size + length+1
-			Dim r = 0
+			r = 0
 			For k = 65 To 79
 				
 				If workbook.Sheets(1).Range(Chr(k) & j) Is Not "" Then
-					poLinesArr(r,j) = workbook.Sheets(1).Range("A" & j) '1
+					poLinesArr(r,j) = workbook.Sheets(1).Range(Chr(k) & j)
 				else
 					poLinesArr(r,j) = "null"
 				End If
 				r = r + 1
+				k = k + 1
 			Next
 		Next
     End If
-    
+    getData = 0
 End Function
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function Main()
@@ -73,6 +75,7 @@ Function Main()
 
 Dim poLinesArr(15,1)
 Dim RowCount
+Dim i, j
 Dim Always  : Always = true
 ReDim poArr(1)
 
@@ -84,7 +87,6 @@ ReDim poArr(1)
 	RowCount = goWBook.Sheets(1).UsedRange.Rows.Count
 	ReDim poArr(RowCount)
 	'copy contents to poArr
-	Dim i
 	For i = 0 To RowCount-1
             With goWBook.Worksheets(1)
 		poArr(i) = .Range("A" & i+1).Value
@@ -97,6 +99,25 @@ ReDim poArr(1)
 	'make a for loop with int size of poArr
 	For i = 0 To RowCount - 1
 		'before while loop, use SendKeysTo to maneuver to, write
+
+		SendKeysTo "%{TAB}" 5000
+		If i = 0 Then
+			SendKeysTo poArr(i) 100
+			SendKeysTo "{ENTER}" 3000
+		else
+			SendKeysTo "^{PgUp}" 100
+			SendKeysTo "^{UP}" 100
+			SendKeysTo "+{END}" 100
+			SendKeysTo "{ENTER}" 3000
+		End If
+		SendKeysTo "^E" 3000
+
+
+
+
+
+
+
 		'the PO # into the filter, enter, export PO lines
 		'add a while loop to catch when the excel file opens with GetObject
 		Always = true
@@ -104,7 +125,6 @@ ReDim poArr(1)
 			Set goExcel = GetObject( , "Excel.Application")
 			If goExcel Is Nothing Then
 				WScript.Sleep 1000
-				Set goExcel = GetObject( , "Excel.Application")
 			else
 				Always = false
 			End If
@@ -114,14 +134,23 @@ ReDim poArr(1)
 		
 		'get the new workbook (Book1) with po lines use initial check to 
 		Set goWBook = goExcel.Workbooks("Book1") 'hopefully get Book1...
-		'redim poLinesArr columns (as rows) 
+		'redim poLinesArr columns (as rows)
+		Dim rowCount: rowCount = goWBook.sheets(1).UsedRange.Row.Count -1
 		'if it's the first, take headers too but exclude last row
+		Dim result: result = getData(goWBook, poLinesArr)
 		'else take 2nd row down -- make sure to transpose rows to columns for
 		'dynamic memory allocation
-
+		goWBook.close false
 	Next
 		
-	
+	Dim finalSize: finalSize = UBound(poLinesArr, 2)
+	'TESTING ARRAY
+	For i = 0 To finalSize
+		For j = 0 To 15
+			WScript.StdOut.write(poLinesArr(j,i))
+		Next
+		Wscript.StdOut.write("\n")
+	Next
 		
 
 	'create excel file and transpose and fill it with poLinesArr
