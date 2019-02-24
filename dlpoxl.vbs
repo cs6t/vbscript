@@ -25,11 +25,12 @@ WScript.Echo gaErr(0) & " " & gaErr(1) & " " & gaErr(2)
 WScript.Quit gnRet
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 Function SendKeysTo (keys, wait)
 	WSh.SendKeys keys
 	Wscript.Sleep wait
 End Function
-'ABOVE IS THE ALL-MIGHTY FUNCTION!!!
+
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function getData (workbook, ByRef poLinesArr)
 	getData = 1
